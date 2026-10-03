@@ -2,25 +2,29 @@
 
 <div class="dash-wrap">
   <div class="page-header">
-    <h1><i class="fas fa-<%= article ? 'edit' : 'plus' %>"></i> <%= article ? 'Modifier l’article de stock' : 'Nouvel article de stock' %></h1>
-    <a href="/stocks" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour au catalogue</a>
+    <div>
+      <h1><i class="fas fa-<%= article ? 'edit' : 'plus-circle' %>" style="color:var(--primary);"></i> <%= article ? 'Modifier la référence de stock' : 'Nouvelle référence au catalogue' %></h1>
+      <p class="subtitle">Gestion des fiches articles, seuils de réapprovisionnement et valorisation financière</p>
+    </div>
+    <a href="/stocks<%= qs %>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour au catalogue</a>
   </div>
 
-  <div class="card" style="max-width:700px; margin: 0 auto;">
-    <div class="card-body">
+  <div class="card" style="max-width:760px; margin: 0 auto 2.5rem;">
+    <div class="card-body" style="padding:2rem;">
       <form method="POST" action="/stock<%= article ? '/modifier' : '/creer' %>">
+        <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
         <% if (article) { %>
           <input type="hidden" name="id" value="<%= article.id %>">
         <% } %>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
           <div class="form-group">
-            <label for="reference">Référence interne *</label>
-            <input type="text" id="reference" name="reference" class="form-control" required value="<%= article ? article.reference : '' %>" placeholder="Ex: REF-STM32WL">
+            <label for="reference">Référence interne catalogue *</label>
+            <input type="text" id="reference" name="reference" class="form-control" required value="<%= article ? article.reference : '' %>" placeholder="Ex: REF-STM32WL" style="font-family:'JetBrains Mono',monospace;">
           </div>
           <div class="form-group">
             <label for="type">Type d'article *</label>
-            <select id="type" name="type" class="form-control" required>
+            <select id="type" name="type" class="form-control" required style="font-weight:600;">
               <option value="piece" <%= !article || article.type === 'piece' ? 'selected' : '' %>>Pièce détachée / composant</option>
               <option value="equipement" <%= article && article.type === 'equipement' ? 'selected' : '' %>>Équipement / outillage labo</option>
             </select>
@@ -37,25 +41,25 @@
           <textarea id="description" name="description" class="form-control" rows="3" placeholder="Boîtier, fréquence, tolérance, plage de tension..."><%= article ? article.description : '' %></textarea>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">
           <div class="form-group">
             <label for="quantite_stock">Quantité en stock</label>
-            <input type="number" step="any" id="quantite_stock" name="quantite_stock" class="form-control" value="<%= article ? article.quantite_stock : 0 %>">
+            <input type="number" step="any" id="quantite_stock" name="quantite_stock" class="form-control" value="<%= article ? article.quantite_stock : 0 %>" style="font-weight:700;">
           </div>
           <div class="form-group">
             <label for="quantite_min">Seuil d'alerte min.</label>
             <input type="number" step="any" id="quantite_min" name="quantite_min" class="form-control" value="<%= article ? article.quantite_min : 0 %>">
           </div>
           <div class="form-group">
-            <label for="unite">Unité</label>
+            <label for="unite">Unité de mesure</label>
             <input type="text" id="unite" name="unite" class="form-control" value="<%= article ? article.unite : 'u' %>" placeholder="u, m, kg...">
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">
           <div class="form-group">
             <label for="valeur_unitaire">Prix unitaire HT (€)</label>
-            <input type="number" step="0.01" id="valeur_unitaire" name="valeur_unitaire" class="form-control" value="<%= article ? article.valeur_unitaire : 0 %>">
+            <input type="number" step="0.01" id="valeur_unitaire" name="valeur_unitaire" class="form-control" value="<%= article ? article.valeur_unitaire : 0 %>" style="font-family:'JetBrains Mono',monospace;">
           </div>
           <div class="form-group">
             <label for="emplacement">Emplacement labo</label>
@@ -72,8 +76,8 @@
           <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="Référence fabricant, bobine, date d’achat..."><%= article ? article.notes : '' %></textarea>
         </div>
 
-        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;">
-          <a href="/stocks" class="btn btn-secondary">Annuler</a>
+        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;border-top:1px solid var(--border-light);padding-top:1.25rem;">
+          <a href="/stocks<%= qs %>" class="btn btn-secondary">Annuler</a>
           <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer l'article</button>
         </div>
       </form>

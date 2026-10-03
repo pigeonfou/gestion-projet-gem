@@ -1,6 +1,13 @@
   </main>
-  <footer class="footer" style="padding: 1.5rem 1rem; text-align: center; color: #64748b; font-size: 0.8rem; border-top: 1px solid #cbd5e1; margin-top: 2rem;">
-    <p>&copy; <%= new Date().getFullYear() %> <%= siteNom %> &mdash; Gestion de projets, processus &amp; documentation</p>
+  <footer class="footer" style="padding: 2rem 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.825rem; border-top: 1px solid var(--border); margin-top: 3rem; background:#ffffff;">
+    <div style="max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:var(--text-main);">
+        <i class="fas fa-project-diagram" style="color:var(--primary);"></i>
+        <span><%= siteNom %></span>
+        <span class="badge-role" style="font-size:0.65rem;">Plateforme R&amp;D</span>
+      </div>
+      <div>&copy; <%= new Date().getFullYear() %> &bull; Conception &amp; Traçabilité Qualité ISO 9001</div>
+    </div>
   </footer>
   <script src="/assets/js/app.js"></script>
 </body>

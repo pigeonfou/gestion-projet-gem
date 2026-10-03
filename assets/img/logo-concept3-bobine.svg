@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" width="240" height="56">
+  <defs>
+    <linearGradient id="bobineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Symbol: Bobine / coil induction loop forming B -->
+  <g transform="translate(4, 4)">
+    <rect width="48" height="48" rx="12" fill="url(#bobineGrad)"/>
+    <!-- Concentric coil / copper spiral loops -->
+    <path d="M16 34 L16 14 L26 14 A6 6 0 0 1 26 24 L16 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M16 24 L28 24 A6 6 0 0 1 28 34 L16 34" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="16" cy="14" r="2.5" fill="#fef3c7"/>
+    <circle cx="16" cy="34" r="2.5" fill="#fef3c7"/>
+  </g>
+  <text x="64" y="36" font-family="'Inter', sans-serif" font-weight="900" font-size="28" fill="#0f172a" letter-spacing="-0.03em">BOBINE</text>
+  <rect x="176" y="19" width="46" height="18" rx="9" fill="#fffbeb"/>
+  <text x="199" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="9" fill="#d97706" text-anchor="middle" letter-spacing="0.06em">ATELIER</text>
+  <text x="65" y="47" font-family="'Inter', sans-serif" font-weight="500" font-size="10.5" fill="#64748b">Matériel, essais &amp; composants</text>
+</svg>

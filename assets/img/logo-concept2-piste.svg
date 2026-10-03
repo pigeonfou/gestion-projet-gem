@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" width="240" height="56">
+  <defs>
+    <linearGradient id="pisteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <!-- Symbol: P formed with 45° PCB trace and pads -->
+  <g transform="translate(4, 4)">
+    <rect width="48" height="48" rx="12" fill="url(#pisteGrad)"/>
+    <!-- PCB trace forming P -->
+    <path d="M16 36 L16 14 L28 14 L34 20 L34 26 L28 30 L16 30" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="36" r="3" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="28" cy="20" r="3" fill="#ffffff"/>
+  </g>
+  <text x="64" y="36" font-family="'Inter', sans-serif" font-weight="900" font-size="28" fill="#0f172a" letter-spacing="-0.03em">PISTE</text>
+  <rect x="150" y="19" width="46" height="18" rx="9" fill="#f0f9ff"/>
+  <text x="173" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="9" fill="#0284c7" text-anchor="middle" letter-spacing="0.06em">R&amp;D LAB</text>
+  <text x="65" y="47" font-family="'Inter', sans-serif" font-weight="500" font-size="10.5" fill="#64748b">La bonne trace du prototype</text>
+</svg>

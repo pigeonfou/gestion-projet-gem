@@ -2,34 +2,38 @@
 
 <div class="dash-wrap">
   <div class="page-header">
-    <h1><i class="fas fa-<%= targetUser ? 'user-edit' : 'user-plus' %>"></i> <%= targetUser ? 'Modifier l’utilisateur' : 'Nouvel utilisateur' %></h1>
-    <a href="/admin/utilisateurs" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
+    <div>
+      <h1><i class="fas fa-<%= targetUser ? 'user-edit' : 'user-plus' %>" style="color:var(--primary);"></i> <%= targetUser ? 'Modifier le compte collaborateur' : 'Créer un compte collaborateur' %></h1>
+      <p class="subtitle">Paramétrage des droits, informations d'accès et compétences</p>
+    </div>
+    <a href="/admin/utilisateurs<%= qs %>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
   </div>
 
-  <div class="card" style="max-width:600px; margin: 0 auto;">
-    <div class="card-body">
+  <div class="card" style="max-width:680px; margin: 0 auto 2.5rem;">
+    <div class="card-body" style="padding:2rem;">
       <form method="POST" action="/admin/utilisateurs<%= targetUser ? '/modifier' : '/creer' %>">
+        <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
         <% if (targetUser) { %>
           <input type="hidden" name="id" value="<%= targetUser.id %>">
         <% } %>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
           <div class="form-group">
-            <label for="identifiant">Identifiant de connexion *</label>
+            <label for="identifiant">Identifiant unique de connexion *</label>
             <input type="text" id="identifiant" name="identifiant" class="form-control" required value="<%= targetUser ? targetUser.identifiant : '' %>" placeholder="Ex: jean.dupont">
           </div>
           <div class="form-group">
-            <label for="role">Rôle dans l'application *</label>
-            <select id="role" name="role" class="form-control" required>
-              <option value="utilisateur" <%= !targetUser || targetUser.role === 'utilisateur' ? 'selected' : '' %>>Utilisateur</option>
-              <option value="admin" <%= targetUser && targetUser.role === 'admin' ? 'selected' : '' %>>Administrateur</option>
+            <label for="role">Rôle et habilitation *</label>
+            <select id="role" name="role" class="form-control" required style="font-weight:600;">
+              <option value="utilisateur" <%= !targetUser || targetUser.role === 'utilisateur' ? 'selected' : '' %>>Utilisateur standard</option>
+              <option value="admin" <%= targetUser && targetUser.role === 'admin' ? 'selected' : '' %>>Administrateur système</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
           <label for="mot_de_passe">Mot de passe <%= targetUser ? '(laisser vide pour ne pas modifier)' : '*' %></label>
-          <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" <%= targetUser ? '' : 'required' %> placeholder="Mot de passe">
+          <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" <%= targetUser ? '' : 'required' %> placeholder="Mot de passe confidentiel">
         </div>
 
         <div class="form-group">
@@ -44,12 +48,12 @@
 
         <div class="form-group">
           <label for="competences">Compétences techniques &amp; qualifications</label>
-          <textarea id="competences" name="competences" class="form-control" rows="3" placeholder="CAO, Firmware, ISO 9001, etc."><%= targetUser ? targetUser.competences : '' %></textarea>
+          <textarea id="competences" name="competences" class="form-control" rows="3" placeholder="Conception 3D, Schémas KiCad, Normes ISO 9001, Firmware C/C++..."><%= targetUser ? targetUser.competences : '' %></textarea>
         </div>
 
-        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;">
-          <a href="/admin/utilisateurs" class="btn btn-secondary">Annuler</a>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;border-top:1px solid var(--border-light);padding-top:1.25rem;">
+          <a href="/admin/utilisateurs<%= qs %>" class="btn btn-secondary">Annuler</a>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer l'utilisateur</button>
         </div>
       </form>
     </div>

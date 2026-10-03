@@ -1,43 +1,51 @@
 <%- include('partials/header') %>
 
 <div class="taches-page-wrap">
-  <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+  <div class="page-header">
     <div>
-      <h1><i class="fas fa-tasks"></i> Gestion des tâches</h1>
-      <p class="text-muted text-sm mt-1">
+      <h1><i class="fas fa-tasks" style="color:var(--primary);"></i> Tableau Kanban des Tâches</h1>
+      <p class="subtitle">
         <% if (user.role === 'admin') { %>
-          Toutes les tâches de tous les projets R&amp;D
+          Visualisation et pilotage global de l'avancement technique de tous les projets
         <% } else { %>
-          Vos tâches affectées &mdash; tous projets confondus
+          Vos tâches affectées &mdash; tous projets R&amp;D confondus
         <% } %>
       </p>
     </div>
     <div style="display:flex;gap:.5rem;">
-      <a href="/tache/creer" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle tâche</a>
+      <a href="/tache/creer<%= qs %>" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Créer une tâche
+      </a>
     </div>
   </div>
 
-  <div class="card" style="padding:.75rem 1rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+  <!-- Barre de filtre par projet & résumé -->
+  <div class="card" style="padding:1rem 1.25rem;margin-bottom:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
     <form method="GET" action="/taches" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-      <label for="projet_filter" style="font-size:0.85rem;font-weight:600;color:#475569;margin:0;">Filtrer par projet :</label>
-      <select id="projet_filter" name="projet_id" class="form-control" style="width:auto;min-width:200px;" onchange="this.form.submit()">
-        <option value="">Tous les projets</option>
+      <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
+      <label for="projet_filter" style="font-size:0.85rem;font-weight:600;color:var(--text-body);margin:0;">
+        <i class="fas fa-filter" style="color:var(--text-muted);margin-right:0.3rem;"></i> Filtrer par projet :
+      </label>
+      <select id="projet_filter" name="projet_id" class="form-control" style="width:auto;min-width:240px;font-weight:500;" onchange="this.form.submit()">
+        <option value="">Tous les projets R&amp;D</option>
         <% projets.forEach(p => { %>
           <option value="<%= p.id %>" <%= selectedProjetId === p.id ? 'selected' : '' %>><%= p.nom %></option>
         <% }); %>
       </select>
     </form>
-    <div style="font-size:0.85rem;color:#64748b;">
-      Total : <strong><%= taches.length %></strong> tâche(s)
+    <div style="font-size:0.875rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;">
+      <span>Total affiché :</span>
+      <span class="badge-role" style="background:#eef2ff;color:#4f46e5;font-weight:700;"><%= taches.length %> tâche(s)</span>
     </div>
   </div>
 
+  <!-- Kanban 4 colonnes -->
   <div class="r1b-kanban r1b-kanban-4">
     <% const cols = [
-         { id: 'a_faire', title: 'À faire', bg: 'kanban-col-todo' },
-         { id: 'en_cours', title: 'En cours', bg: 'kanban-col-progress' },
-         { id: 'validation', title: 'En validation', bg: 'kanban-col-validation' },
-         { id: 'terminee', title: 'Terminé', bg: 'kanban-col-done' }
+         { id: 'a_faire', title: 'À faire', bg: 'kanban-col-todo', icon: 'fa-circle' },
+         { id: 'en_cours', title: 'En cours', bg: 'kanban-col-progress', icon: 'fa-spinner' },
+         { id: 'validation', title: 'En validation', bg: 'kanban-col-validation', icon: 'fa-clipboard-check' },
+         { id: 'terminee', title: 'Terminé', bg: 'kanban-col-done', icon: 'fa-check-circle' }
        ];
     %>
     <% cols.forEach(col => { 
@@ -45,39 +53,69 @@
     %>
       <div class="r1b-kanban-col <%= col.bg %>">
         <div class="r1b-kanban-head">
-          <span class="kanban-col-title"><%= col.title %></span>
+          <span class="kanban-col-title">
+            <i class="fas <%= col.icon %>" style="font-size:0.75rem;margin-right:0.35rem;opacity:0.8;"></i>
+            <%= col.title %>
+          </span>
           <span class="kanban-col-count"><%= items.length %></span>
         </div>
+        
         <% if (items.length === 0) { %>
-          <p class="text-muted text-sm" style="padding:.35rem .15rem;">Aucune tâche</p>
+          <div style="text-align:center;padding:2rem 0;color:var(--text-muted);font-size:0.825rem;">
+            <i class="fas fa-inbox" style="font-size:1.5rem;opacity:0.3;margin-bottom:0.4rem;display:block;"></i>
+            Aucune tâche
+          </div>
         <% } %>
+
         <% items.forEach(t => { 
              const p = projets.find(x => x.id === t.projet_id);
+             const prioStyle = t.priorite === 'urgente' 
+               ? 'background:#fef2f2;color:#991b1b;border:1px solid #fecaca;' 
+               : (t.priorite === 'haute' 
+                 ? 'background:#fffbeb;color:#92400e;border:1px solid #fde68a;' 
+                 : 'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;');
         %>
           <div class="r1b-kanban-card">
-            <p class="font-medium"><a href="/tache/modifier?id=<%= t.id %>"><%= t.titre %></a></p>
+            <p class="font-medium"><a href="/tache/modifier?id=<%= t.id %><%= qAmp %>"><%= t.titre %></a></p>
+            
             <% if (t.description) { %>
-              <p class="text-xs text-muted mt-1" style="white-space:pre-wrap;line-height:1.4;"><%= t.description.length > 120 ? t.description.slice(0, 120) + '…' : t.description %></p>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.4rem;line-height:1.4;"><%= t.description.length > 110 ? t.description.slice(0, 110) + '…' : t.description %></p>
             <% } %>
-            <p class="task-card-meta">
-              #<%= t.id %> · Priorité <%= t.priorite %>
-              <% if (t.date_echeance) { %> · Échéance : <%= t.date_echeance %><% } %>
-            </p>
+
+            <div class="task-card-meta">
+              <span class="badge-role" style="font-size:0.65rem;font-weight:700;">#<%= t.id %></span>
+              <span class="badge-role" style="font-size:0.65rem;font-weight:700;<%= prioStyle %>">
+                <%= t.priorite %>
+              </span>
+              <% if (t.date_echeance) { %>
+                <span style="font-size:0.7rem;color:var(--text-muted);"><i class="fas fa-calendar-alt"></i> <%= t.date_echeance %></span>
+              <% } %>
+            </div>
+
             <div class="kanban-card-foot">
               <div>
-                <div class="kanban-assignee"><%= t.assigne_a || 'Non assigné' %></div>
+                <div class="kanban-assignee">
+                  <span class="user-avatar-circle" style="width:22px;height:22px;font-size:0.65rem;">
+                    <%= t.assigne_a ? t.assigne_a.charAt(0).toUpperCase() : '?' %>
+                  </span>
+                  <span style="font-size:0.75rem;"><%= t.assigne_a || 'Non assigné' %></span>
+                </div>
                 <% if (p) { %>
-                  <a class="kanban-project-link" href="/projet?id=<%= p.id %>&view=taches" style="font-size:0.75rem;color:#6366f1;text-decoration:none;display:inline-block;margin-top:0.25rem;">
-                    <i class="fas fa-folder-open"></i> <%= p.nom %>
-                  </a>
+                  <div style="margin-top:0.35rem;">
+                    <a href="/projet?id=<%= p.id %>&view=taches<%= qAmp %>" style="font-size:0.72rem;color:var(--primary);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.25rem;">
+                      <i class="fas fa-folder-open"></i> <%= p.nom %>
+                    </a>
+                  </div>
                 <% } %>
               </div>
+
               <form method="POST" action="/taches/update_status" class="kanban-status-form">
+                <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
                 <input type="hidden" name="task_id" value="<%= t.id %>">
-                <select name="status" class="kanban-status-select" onchange="this.form.submit()">
+                <select name="status" class="kanban-status-select" onchange="this.form.submit()" title="Changer le statut">
                   <option value="a_faire" <%= t.kanban_status === 'a_faire' ? 'selected' : '' %>>À faire</option>
                   <option value="en_cours" <%= t.kanban_status === 'en_cours' ? 'selected' : '' %>>En cours</option>
-                  <option value="validation" <%= t.kanban_status === 'validation' ? 'selected' : '' %>>En validation</option>
+                  <option value="validation" <%= t.kanban_status === 'validation' ? 'selected' : '' %>>Validation</option>
                   <option value="terminee" <%= t.kanban_status === 'terminee' ? 'selected' : '' %>>Terminé</option>
                 </select>
               </form>

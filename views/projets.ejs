@@ -3,80 +3,120 @@
 <div class="dash-wrap">
   <div class="dash-page-head">
     <div>
-      <h2>Tableau de bord</h2>
-      <p class="subtitle">Vue d'ensemble des projets de conception</p>
+      <h1><i class="fas fa-layer-group" style="color:var(--primary);"></i> Tableau de bord</h1>
+      <p class="subtitle">Pilotage des projets de conception électronique, mécanique et R&amp;D</p>
     </div>
     <div class="dash-toolbar">
       <form method="GET" action="/projets" style="display:flex;gap:.5rem;">
-        <select name="tri" class="form-control" onchange="this.form.submit()">
-          <option value="date_desc" <%= tri === 'date_desc' ? 'selected' : '' %>>Plus récents</option>
-          <option value="date_asc" <%= tri === 'date_asc' ? 'selected' : '' %>>Plus anciens</option>
-          <option value="nom_asc" <%= tri === 'nom_asc' ? 'selected' : '' %>>Nom A→Z</option>
-          <option value="nom_desc" <%= tri === 'nom_desc' ? 'selected' : '' %>>Nom Z→A</option>
+        <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
+        <select name="tri" class="form-control" onchange="this.form.submit()" style="font-weight:500;">
+          <option value="date_desc" <%= tri === 'date_desc' ? 'selected' : '' %>>Trier : Plus récents</option>
+          <option value="date_asc" <%= tri === 'date_asc' ? 'selected' : '' %>>Trier : Plus anciens</option>
+          <option value="nom_asc" <%= tri === 'nom_asc' ? 'selected' : '' %>>Trier : Nom A→Z</option>
+          <option value="nom_desc" <%= tri === 'nom_desc' ? 'selected' : '' %>>Trier : Nom Z→A</option>
         </select>
       </form>
-      <a href="/projets/creer" class="btn-r1b btn-r1b-primary">
+      <a href="/projets/creer<%= qs %>" class="btn btn-primary">
         <i class="fas fa-plus"></i> Nouveau projet
       </a>
     </div>
   </div>
 
-  <!-- KPI -->
+  <!-- KPI Grid Synthétique & Moderne -->
   <div class="dash-kpi-grid">
     <div class="dash-kpi">
-      <p class="dash-kpi-label">Projets actifs</p>
-      <p class="dash-kpi-value"><%= kpis.projetsActifs %></p>
+      <div class="dash-kpi-header">
+        <span class="dash-kpi-label">Projets actifs</span>
+        <div class="dash-kpi-icon indigo"><i class="fas fa-project-diagram"></i></div>
+      </div>
+      <div class="dash-kpi-value"><%= kpis.projetsActifs %></div>
     </div>
+
     <div class="dash-kpi">
-      <p class="dash-kpi-label">Tâches en cours</p>
-      <p class="dash-kpi-value"><%= kpis.tachesOuvertes %></p>
+      <div class="dash-kpi-header">
+        <span class="dash-kpi-label">Tâches en cours</span>
+        <div class="dash-kpi-icon blue"><i class="fas fa-tasks"></i></div>
+      </div>
+      <div class="dash-kpi-value"><%= kpis.tachesOuvertes %></div>
     </div>
+
     <div class="dash-kpi">
-      <p class="dash-kpi-label">Validations en attente</p>
-      <p class="dash-kpi-value"><%= kpis.validationsPending %></p>
+      <div class="dash-kpi-header">
+        <span class="dash-kpi-label">Validations R1b</span>
+        <div class="dash-kpi-icon amber"><i class="fas fa-clipboard-check"></i></div>
+      </div>
+      <div class="dash-kpi-value"><%= kpis.validationsPending %></div>
     </div>
+
     <div class="dash-kpi">
-      <p class="dash-kpi-label">Jalons</p>
-      <p class="dash-kpi-value"><%= kpis.jalonsTotal %></p>
+      <div class="dash-kpi-header">
+        <span class="dash-kpi-label">Jalons validés</span>
+        <div class="dash-kpi-icon emerald"><i class="fas fa-flag-checkered"></i></div>
+      </div>
+      <div class="dash-kpi-value"><%= kpis.jalonsTotal %></div>
     </div>
   </div>
 
   <div class="dash-grid">
     <div class="dash-col-main">
-      <div class="dash-card">
-        <h3>Projets (En cours)</h3>
+      <!-- Projets en cours -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-folder-open" style="color:var(--primary);"></i> Projets en cours d'exécution</h3>
+          <span class="badge-role" style="background:#eef2ff;color:#4f46e5;font-weight:700;"><%= projetsEnCours.length %> actif(s)</span>
+        </div>
+
         <% if (projetsEnCours.length === 0) { %>
-          <div class="dash-empty">
-            <i class="fas fa-folder-open"></i>
-            <p>Aucun projet en cours.</p>
-            <a href="/projets/creer" class="btn-r1b btn-r1b-primary" style="margin-top:.75rem;">Créer un projet</a>
+          <div style="text-align:center;padding:3rem 1.5rem;color:var(--text-muted);">
+            <i class="fas fa-folder-open" style="font-size:2.5rem;opacity:0.3;margin-bottom:0.75rem;display:block;"></i>
+            <p style="font-weight:600;margin-bottom:0.5rem;">Aucun projet en cours</p>
+            <p style="font-size:0.85rem;margin-bottom:1rem;">Lancez un nouveau projet de conception dès maintenant.</p>
+            <a href="/projets/creer<%= qs %>" class="btn btn-primary"><i class="fas fa-plus"></i> Créer un projet</a>
           </div>
         <% } else { %>
           <div class="dash-proj-list">
-            <% projetsEnCours.forEach(p => { %>
-              <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
+            <% projetsEnCours.forEach(p => { 
+                 const pct = Math.round((p.current_step / 9) * 100);
+            %>
+              <div class="dash-proj-item" onclick="if(!event.target.closest('a,button,form')) location.href='/projet?id=<%= p.id %><%= qAmp %>'">
                 <div class="dash-proj-top">
                   <div>
                     <span class="dash-proj-name"><%= p.nom %></span>
-                    <span class="dash-proj-badge"><%= steps[p.current_step] ? steps[p.current_step].title : 'Étape ' + p.current_step %></span>
+                    <span class="dash-proj-badge">
+                      <i class="fas fa-microchip"></i>
+                      Étape <%= p.current_step %>/9 : <%= steps[p.current_step] ? steps[p.current_step].title : '' %>
+                    </span>
                   </div>
-                  <span class="dash-proj-pct"><%= Math.round((p.current_step / 9) * 100) %>%</span>
+                  <span class="dash-proj-pct"><%= pct %>%</span>
                 </div>
+
                 <div class="dash-proj-bar">
-                  <div class="dash-proj-fill" style="width:<%= Math.round((p.current_step / 9) * 100) %>%"></div>
+                  <div class="dash-proj-fill" style="width:<%= pct %>%;"></div>
                 </div>
-                <p class="dash-proj-meta">
-                  <%= p.createur %> · <%= p.nb_taches %> tâche(s)
+
+                <div class="dash-proj-meta">
+                  <span><i class="fas fa-user-circle"></i> <%= p.createur %></span>
+                  <span>&bull;</span>
+                  <span><i class="fas fa-check-circle"></i> <%= p.nb_taches %> tâche(s)</span>
                   <% if (p.description) { %>
-                    · <%= p.description.length > 80 ? p.description.slice(0, 80) + '…' : p.description %>
+                    <span>&bull;</span>
+                    <span style="color:var(--text-body);"><%= p.description.length > 70 ? p.description.slice(0, 70) + '…' : p.description %></span>
                   <% } %>
-                </p>
+                </div>
+
                 <div class="dash-proj-actions" onclick="event.stopPropagation()">
-                  <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
-                  <a href="/projets/modifier?id=<%= p.id %>" class="btn-r1b btn-r1b-secondary btn-r1b-sm"><i class="fas fa-edit"></i></a>
-                  <form method="POST" action="/projets/supprimer" style="display:inline;" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
+                  <a href="/projet?id=<%= p.id %><%= qAmp %>" class="btn btn-primary btn-sm">
+                    <i class="fas fa-arrow-right"></i> Ouvrir le projet
+                  </a>
+                  <a href="/projets/modifier?id=<%= p.id %><%= qAmp %>" class="btn btn-secondary btn-sm" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <form method="POST" action="/projets/supprimer" style="display:inline;" onsubmit="return confirm('Confirmer la suppression définitive de ce projet ?');">
+                    <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
                     <input type="hidden" name="id" value="<%= p.id %>">
-                    <button type="submit" class="btn-r1b btn-r1b-danger btn-r1b-sm"><i class="fas fa-trash"></i></button>
+                    <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </form>
                 </div>
               </div>
@@ -85,86 +125,110 @@
         <% } %>
       </div>
 
-      <div class="dash-card">
-        <h3>Archivage</h3>
-        <div class="dash-archive-wrap">
-          <div class="dash-archive-section abandonnes">
-            <h4>
-              <i class="fas fa-times-circle"></i> Projets abandonnés
-              <span class="count"><%= projetsAbandonnes.length %></span>
-            </h4>
-            <% if (projetsAbandonnes.length === 0) { %>
-              <div class="dash-empty"><p>Aucun projet abandonné.</p></div>
-            <% } else { %>
-              <div class="dash-proj-list">
-                <% projetsAbandonnes.forEach(p => { %>
-                  <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
-                    <div class="dash-proj-top">
-                      <div>
-                        <span class="dash-proj-name"><%= p.nom %></span>
-                        <span class="dash-proj-badge" style="background:#fee2e2;color:#b91c1c;">Abandonné (NO GO)</span>
-                      </div>
-                      <span class="dash-proj-pct"><%= Math.round((p.current_step / 9) * 100) %>%</span>
-                    </div>
-                    <div class="dash-proj-bar">
-                      <div class="dash-proj-fill" style="width:<%= Math.round((p.current_step / 9) * 100) %>%; background:#ef4444;"></div>
-                    </div>
-                    <p class="dash-proj-meta"><%= p.createur %> · <%= p.nb_taches %> tâche(s)</p>
-                    <div class="dash-proj-actions" onclick="event.stopPropagation()">
-                      <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
-                    </div>
-                  </div>
-                <% }); %>
-              </div>
-            <% } %>
-          </div>
+      <!-- Sections Archivage (NO GO & Validé Vente) -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-archive" style="color:var(--text-muted);"></i> Archivage &amp; Historique des Projets</h3>
+        </div>
 
-          <div class="dash-archive-section valides">
-            <h4>
-              <i class="fas fa-check-circle"></i> Projets validé/vente
-              <span class="count"><%= projetsValides.length %></span>
-            </h4>
-            <% if (projetsValides.length === 0) { %>
-              <div class="dash-empty"><p>Aucun projet validé / vente.</p></div>
-            <% } else { %>
-              <div class="dash-proj-list">
-                <% projetsValides.forEach(p => { %>
-                  <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
-                    <div class="dash-proj-top">
-                      <div>
-                        <span class="dash-proj-name"><%= p.nom %></span>
-                        <span class="dash-proj-badge" style="background:#d1fae5;color:#047857;">Validé / Vente</span>
+        <div style="padding:1.25rem;">
+          <div class="dash-archive-wrap" style="margin-top:0;">
+            <div class="dash-archive-section abandonnes">
+              <h4>
+                <i class="fas fa-ban" style="color:#ef4444;"></i> Projets Abandonnés (NO GO)
+                <span class="count"><%= projetsAbandonnes.length %></span>
+              </h4>
+              <% if (projetsAbandonnes.length === 0) { %>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0;">Aucun projet abandonné.</p>
+              <% } else { %>
+                <div class="dash-proj-list" style="padding:0.5rem 0 0;">
+                  <% projetsAbandonnes.forEach(p => { %>
+                    <div class="dash-proj-item" style="border-left:4px solid #ef4444;" onclick="if(!event.target.closest('a,button,form')) location.href='/projet?id=<%= p.id %><%= qAmp %>'">
+                      <div class="dash-proj-top">
+                        <div>
+                          <span class="dash-proj-name"><%= p.nom %></span>
+                          <span class="dash-proj-badge" style="background:#fee2e2;color:#b91c1c;">
+                            <i class="fas fa-times-circle"></i> Décision NO GO
+                          </span>
+                        </div>
+                        <a href="/projet?id=<%= p.id %><%= qAmp %>" class="btn btn-secondary btn-sm">Consulter</a>
                       </div>
-                      <span class="dash-proj-pct">100%</span>
                     </div>
-                    <div class="dash-proj-bar">
-                      <div class="dash-proj-fill" style="width:100%; background:#10b981;"></div>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+
+            <div class="dash-archive-section valides">
+              <h4>
+                <i class="fas fa-check-circle" style="color:#10b981;"></i> Projets Validés / Clôturés
+                <span class="count"><%= projetsValides.length %></span>
+              </h4>
+              <% if (projetsValides.length === 0) { %>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0;">Aucun projet en statut validé / vente.</p>
+              <% } else { %>
+                <div class="dash-proj-list" style="padding:0.5rem 0 0;">
+                  <% projetsValides.forEach(p => { %>
+                    <div class="dash-proj-item" style="border-left:4px solid #10b981;" onclick="if(!event.target.closest('a,button,form')) location.href='/projet?id=<%= p.id %><%= qAmp %>'">
+                      <div class="dash-proj-top">
+                        <div>
+                          <span class="dash-proj-name"><%= p.nom %></span>
+                          <span class="dash-proj-badge" style="background:#ecfdf5;color:#047857;">
+                            <i class="fas fa-award"></i> Validé DG / Vente
+                          </span>
+                        </div>
+                        <a href="/projet?id=<%= p.id %><%= qAmp %>" class="btn btn-secondary btn-sm">Consulter</a>
+                      </div>
                     </div>
-                    <p class="dash-proj-meta"><%= p.createur %> · <%= p.nb_taches %> tâche(s)</p>
-                    <div class="dash-proj-actions" onclick="event.stopPropagation()">
-                      <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
-                    </div>
-                  </div>
-                <% }); %>
-              </div>
-            <% } %>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="dash-card">
-      <h3>Activité récente</h3>
-      <% if (projetsEnCours.length === 0) { %>
-        <p class="text-muted text-sm">Aucune activité</p>
-      <% } else { %>
-        <% projetsEnCours.slice(0, 6).forEach(p => { %>
-          <div class="dash-side-item">
-            <p class="dash-side-title"><%= p.nom %></p>
-            <p class="dash-side-meta"><%= steps[p.current_step] ? steps[p.current_step].title : 'Étape ' + p.current_step %> · <%= p.date_creation.split(' ')[0] %> · <%= p.createur %></p>
+    <!-- Right column: Recent Activity & Quick Stats -->
+    <div class="dash-col-side" style="display:flex;flex-direction:column;gap:1.5rem;">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-clock" style="color:var(--primary);"></i> Activité récente</h3>
+        </div>
+        <div style="padding:1.25rem;">
+          <% if (projetsEnCours.length === 0) { %>
+            <p style="font-size:0.85rem;color:var(--text-muted);">Aucune activité récente.</p>
+          <% } else { %>
+            <% projetsEnCours.slice(0, 5).forEach(p => { %>
+              <div class="dash-side-item">
+                <a href="/projet?id=<%= p.id %><%= qAmp %>" style="text-decoration:none;color:inherit;">
+                  <div class="dash-side-title"><%= p.nom %></div>
+                  <div class="dash-side-meta">
+                    <span class="badge-role" style="font-size:0.65rem;">Étape <%= p.current_step %></span>
+                    <span>&bull;</span>
+                    <span><%= p.createur %></span>
+                  </div>
+                </a>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card" style="background:linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);color:#ffffff;">
+        <div style="padding:1.5rem;">
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
+            <i class="fas fa-lightbulb" style="color:#fde047;font-size:1.25rem;"></i>
+            <h4 style="margin:0;font-size:1rem;color:#ffffff;font-weight:700;">Processus R1b R&amp;D</h4>
           </div>
-        <% }); %>
-      <% } %>
+          <p style="font-size:0.825rem;color:#e0e7ff;line-height:1.45;margin-bottom:1rem;">
+            ProjectFlow structure le cycle de conception en 9 étapes jalonnées, garantissant la conformité ISO et la traçabilité des composants.
+          </p>
+          <a href="/management<%= qs %>" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.25);">
+            Consulter le système qualité
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>

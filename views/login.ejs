@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="login-page">
-  <div class="login-card">
+  <div class="login-card" style="max-width: 440px; margin: 2rem auto;">
     <div class="logo-login">
       <i class="fas fa-project-diagram"></i>
       <h1><%= siteNom %></h1>
@@ -16,30 +16,48 @@
     </div>
 
     <% if (error) { %>
-      <div class="error-msg" style="background:#fee2e2;color:#b91c1c;padding:0.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+      <div class="error-msg" style="background:#fee2e2;color:#b91c1c;padding:0.75rem 1rem;border-radius:6px;margin-bottom:1.25rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
         <i class="fas fa-exclamation-circle"></i>
         <span><%= error %></span>
       </div>
     <% } %>
 
-    <form action="/login" method="POST" autocomplete="off">
+    <!-- Formulaire classique -->
+    <form action="/login" method="POST" autocomplete="off" id="loginForm">
       <div class="form-group">
         <label for="identifiant"><i class="fas fa-user"></i> Identifiant</label>
         <input type="text" id="identifiant" name="identifiant" class="form-control" required autofocus placeholder="Votre identifiant" value="admin">
       </div>
       <div class="form-group">
         <label for="mot_de_passe"><i class="fas fa-lock"></i> Mot de passe</label>
-        <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" required placeholder="Votre mot de passe" value="admin">
+        <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" placeholder="Votre mot de passe" value="admin">
       </div>
       <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:1rem;">
         <i class="fas fa-sign-in-alt"></i> Se connecter
       </button>
     </form>
 
-    <div style="margin-top:1.5rem;padding:0.75rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8rem;color:#64748b;">
-      <p style="margin:0 0 0.35rem;font-weight:600;"><i class="fas fa-info-circle"></i> Comptes de démonstration :</p>
-      <p style="margin:0;">• Admin : <code>admin</code> / <code>admin</code></p>
-      <p style="margin:0;">• Ingénieur : <code>jean.dupont</code> / <code>password</code></p>
+    <!-- Boutons d'accès rapide 1-clic pour la démo -->
+    <div style="margin-top:1.5rem;padding:1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+      <p style="margin:0 0 0.75rem;font-weight:600;font-size:0.85rem;color:#334155;text-align:center;">
+        <i class="fas fa-bolt" style="color:#eab308;"></i> Connexion directe en 1 clic :
+      </p>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        <form action="/login" method="POST" style="margin:0;">
+          <input type="hidden" name="identifiant" value="admin">
+          <input type="hidden" name="mot_de_passe" value="admin">
+          <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;background:#ede9fe;color:#5b21b6;border-color:#ddd6fe;font-weight:600;">
+            <i class="fas fa-user-shield"></i> Accéder en tant qu'Administrateur (admin)
+          </button>
+        </form>
+        <form action="/login" method="POST" style="margin:0;">
+          <input type="hidden" name="identifiant" value="jean.dupont">
+          <input type="hidden" name="mot_de_passe" value="password">
+          <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;background:#e0f2fe;color:#0369a1;border-color:#bae6fd;">
+            <i class="fas fa-user"></i> Accéder en tant qu'Ingénieur R&amp;D (jean.dupont)
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </body>

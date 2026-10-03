@@ -2,49 +2,61 @@
 
 <div class="dash-wrap">
   <div class="page-header">
-    <h1><i class="fas fa-<%= projet ? 'edit' : 'plus' %>"></i> <%= projet ? 'Modifier le projet' : 'Nouveau projet' %></h1>
-    <a href="/projets" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
+    <div>
+      <h1><i class="fas fa-<%= projet ? 'edit' : 'plus-circle' %>" style="color:var(--primary);"></i> <%= projet ? 'Modifier le projet' : 'Créer un nouveau projet' %></h1>
+      <p class="subtitle"><%= projet ? 'Mise à jour des paramètres et de la note de cadrage' : 'Enregistrement initial du projet dans le processus R1b' %></p>
+    </div>
+    <a href="/projets<%= qs %>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
   </div>
 
-  <div class="card" style="max-width:640px; margin: 0 auto;">
-    <div class="card-body">
+  <div class="card" style="max-width:680px; margin: 0 auto;">
+    <div class="card-body" style="padding:2rem;">
       <form method="POST" action="/projets<%= projet ? '/modifier' : '/creer' %>">
+        <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
         <% if (projet) { %>
           <input type="hidden" name="id" value="<%= projet.id %>">
         <% } %>
         
         <div class="form-group">
-          <label for="nom">Nom du projet *</label>
+          <label for="nom">Nom du projet de conception *</label>
           <input type="text" id="nom" name="nom" class="form-control" required value="<%= projet ? projet.nom : '' %>" maxlength="150" placeholder="Ex: Boîtier IoT Industriel V2">
         </div>
 
         <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" name="description" class="form-control" rows="4" placeholder="Contexte, finalité et objectifs clés du projet"><%= projet ? projet.description : '' %></textarea>
+          <label for="description">Description &amp; Objectifs</label>
+          <textarea id="description" name="description" class="form-control" rows="4" placeholder="Contexte, finalité technique et besoins clients..."><%= projet ? projet.description : '' %></textarea>
         </div>
 
-        <fieldset class="form-group" style="border:1px solid #cbd5e1;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
-          <legend style="padding:0 .5rem;font-weight:600;font-size:0.9rem;">Origine de l’entrée et destination de sortie du projet</legend>
-          <p style="margin:0 0 .5rem;font-size:0.85rem;color:#475569;"><strong>Direction générale via :</strong></p>
-          <label style="display:inline-flex;align-items:center;gap:.4rem;margin-right:1.5rem;font-size:0.875rem;">
-            <input type="checkbox" name="cadrage_commerciale" value="1" <%= projet && projet.cadrage_commerciale ? 'checked' : '' %>> Service Commercial
-          </label>
-          <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;">
-            <input type="checkbox" name="cadrage_technique" value="1" <%= projet && projet.cadrage_technique ? 'checked' : '' %>> Service Technique
-          </label>
+        <fieldset class="form-group" style="border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.5rem;background:var(--bg-subtle);">
+          <legend style="padding:0 .5rem;font-weight:700;font-size:0.875rem;color:var(--text-main);">
+            <i class="fas fa-compass" style="color:var(--primary);margin-right:0.3rem;"></i>
+            Origine de l’entrée et destination de sortie du projet
+          </legend>
           
-          <p style="margin:.85rem 0 .5rem;font-size:0.85rem;color:#475569;"><strong>Destination du besoin :</strong></p>
-          <label style="display:inline-flex;align-items:center;gap:.4rem;margin-right:1.5rem;font-size:0.875rem;">
-            <input type="radio" name="cadrage_destination" value="interne" <%= (!projet || projet.cadrage_destination === 'interne') ? 'checked' : '' %>> Interne
-          </label>
-          <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;">
-            <input type="radio" name="cadrage_destination" value="externe" <%= (projet && projet.cadrage_destination === 'externe') ? 'checked' : '' %>> Externe (client)
-          </label>
+          <p style="margin:0.25rem 0 .5rem;font-size:0.85rem;color:var(--text-body);font-weight:600;">Direction générale via :</p>
+          <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;cursor:pointer;">
+              <input type="checkbox" name="cadrage_commerciale" value="1" <%= projet && projet.cadrage_commerciale ? 'checked' : '' %>> Service Commercial
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;cursor:pointer;">
+              <input type="checkbox" name="cadrage_technique" value="1" <%= projet && projet.cadrage_technique ? 'checked' : '' %>> Service Technique
+            </label>
+          </div>
+          
+          <p style="margin:0.25rem 0 .5rem;font-size:0.85rem;color:var(--text-body);font-weight:600;">Destination du besoin :</p>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+            <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;cursor:pointer;">
+              <input type="radio" name="cadrage_destination" value="interne" <%= (!projet || projet.cadrage_destination === 'interne') ? 'checked' : '' %>> Interne (Laboratoire R&amp;D)
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:.4rem;font-size:0.875rem;cursor:pointer;">
+              <input type="radio" name="cadrage_destination" value="externe" <%= (projet && projet.cadrage_destination === 'externe') ? 'checked' : '' %>> Externe (Client final / Marché)
+            </label>
+          </div>
         </fieldset>
 
-        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;">
-          <a href="/projets" class="btn btn-secondary">Annuler</a>
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        <div class="form-actions" style="display:flex;gap:.75rem;justify-content:flex-end;border-top:1px solid var(--border-light);padding-top:1.25rem;">
+          <a href="/projets<%= qs %>" class="btn btn-secondary">Annuler</a>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer le projet</button>
         </div>
       </form>
     </div>

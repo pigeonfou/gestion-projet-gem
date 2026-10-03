@@ -2,20 +2,24 @@
 
 <div class="dash-wrap">
   <div class="page-header">
-    <h1><i class="fas fa-<%= tache ? 'edit' : 'plus' %>"></i> <%= tache ? 'Modifier la tâche' : 'Nouvelle tâche' %></h1>
-    <a class="btn btn-secondary" href="/taches"><i class="fas fa-arrow-left"></i> Retour aux tâches</a>
+    <div>
+      <h1><i class="fas fa-<%= tache ? 'edit' : 'plus-circle' %>" style="color:var(--primary);"></i> <%= tache ? 'Modifier la tâche #' + tache.id : 'Nouvelle tâche de travail' %></h1>
+      <p class="subtitle">Affectation, planification et traçabilité des livrables techniques</p>
+    </div>
+    <a class="btn btn-secondary" href="/taches<%= qs %>"><i class="fas fa-arrow-left"></i> Retour aux tâches</a>
   </div>
 
-  <div class="card" style="max-width:800px; margin: 0 auto 2rem;">
-    <div class="card-body">
+  <div class="card" style="max-width:840px; margin: 0 auto 2.5rem;">
+    <div class="card-body" style="padding:2rem;">
       <form method="POST" action="/tache<%= tache ? '/modifier' : '/creer' %>">
+        <% if (locals.sid) { %><input type="hidden" name="sid" value="<%= locals.sid %>"><% } %>
         <% if (tache) { %>
           <input type="hidden" name="id" value="<%= tache.id %>">
         <% } %>
 
         <div class="form-group">
           <label for="projet_id">Projet associé *</label>
-          <select id="projet_id" name="projet_id" class="form-control" required>
+          <select id="projet_id" name="projet_id" class="form-control" required style="font-weight:600;">
             <% projets.forEach(p => { %>
               <option value="<%= p.id %>" <%= (tache && tache.projet_id === p.id) || (!tache && selectedProjetId === p.id) ? 'selected' : '' %>>
                 <%= p.nom %>
@@ -25,31 +29,31 @@
         </div>
 
         <div class="form-group">
-          <label for="titre">Titre de la tâche *</label>
+          <label for="titre">Intitulé de la tâche *</label>
           <input type="text" id="titre" name="titre" class="form-control" required value="<%= tache ? tache.titre : '' %>" placeholder="Ex: Routage de la carte PCB v1.0">
         </div>
 
         <div class="form-group">
           <label for="description">Contexte et travail attendu</label>
-          <textarea id="description" name="description" class="form-control" rows="4" placeholder="Détail des actions à mener, contraintes et spécifications associées"><%= tache ? tache.description : '' %></textarea>
+          <textarea id="description" name="description" class="form-control" rows="4" placeholder="Détail des actions à mener, contraintes et spécifications associées..."><%= tache ? tache.description : '' %></textarea>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
           <div class="form-group">
-            <label for="assigne_a">Affectation (collaborateur)</label>
+            <label for="assigne_a">Affectation (collaborateur R&amp;D)</label>
             <select id="assigne_a" name="assigne_a" class="form-control">
               <option value="">Non assigné</option>
               <% users.forEach(u => { %>
                 <option value="<%= u.identifiant %>" <%= tache && tache.assigne_a === u.identifiant ? 'selected' : '' %>>
-                  <%= u.identifiant %> &mdash; <%= u.nom_affiche || '' %> (<%= u.fonction || '' %>)
+                  <%= u.identifiant %> &mdash; <%= u.nom_affiche || '' %> (<%= u.fonction || 'Utilisateur' %>)
                 </option>
               <% }); %>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="priorite">Priorité</label>
-            <select id="priorite" name="priorite" class="form-control">
+            <label for="priorite">Priorité technique</label>
+            <select id="priorite" name="priorite" class="form-control" style="font-weight:600;">
               <option value="basse" <%= tache && tache.priorite === 'basse' ? 'selected' : '' %>>Basse</option>
               <option value="moyenne" <%= !tache || tache.priorite === 'moyenne' ? 'selected' : '' %>>Moyenne</option>
               <option value="haute" <%= tache && tache.priorite === 'haute' ? 'selected' : '' %>>Haute</option>
@@ -58,10 +62,10 @@
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
           <div class="form-group">
             <label for="kanban_status">Statut Kanban</label>
-            <select id="kanban_status" name="kanban_status" class="form-control">
+            <select id="kanban_status" name="kanban_status" class="form-control" style="font-weight:600;">
               <option value="a_faire" <%= !tache || tache.kanban_status === 'a_faire' ? 'selected' : '' %>>À faire</option>
               <option value="en_cours" <%= tache && tache.kanban_status === 'en_cours' ? 'selected' : '' %>>En cours</option>
               <option value="validation" <%= tache && tache.kanban_status === 'validation' ? 'selected' : '' %>>En validation</option>
@@ -70,14 +74,14 @@
           </div>
 
           <div class="form-group">
-            <label for="date_debut">Date de début prévue</label>
+            <label for="date_debut">Date de début prévue (Gantt)</label>
             <input type="date" id="date_debut" name="date_debut" class="form-control" value="<%= tache ? tache.date_debut || '' : '' %>">
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
           <div class="form-group">
-            <label for="date_echeance">Date d’échéance</label>
+            <label for="date_echeance">Date d’échéance impérative</label>
             <input type="date" id="date_echeance" name="date_echeance" class="form-control" value="<%= tache ? tache.date_echeance || '' : '' %>">
           </div>
 
@@ -89,36 +93,37 @@
 
         <div class="form-group">
           <label for="resultats">Résultats / livrables / preuves de réalisation</label>
-          <textarea id="resultats" name="resultats" class="form-control" rows="3" placeholder="Notes de clôture, liens de fichiers de conception, mesures obtenues..."><%= tache ? tache.resultats || '' : '' %></textarea>
+          <textarea id="resultats" name="resultats" class="form-control" rows="3" placeholder="Notes de clôture, relevés de banc de test, liens de conception..."><%= tache ? tache.resultats || '' : '' %></textarea>
         </div>
 
-        <div class="form-actions" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="form-actions" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-light);padding-top:1.5rem;margin-top:1.5rem;">
           <div>
             <% if (tache) { %>
-              <form method="POST" action="/tache/supprimer" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette tâche ?');">
-                <input type="hidden" name="id" value="<%= tache.id %>">
-                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
-              </form>
+              <button type="submit" formaction="/tache/supprimer" class="btn btn-danger" onclick="return confirm('Confirmer la suppression définitive de cette tâche ?');">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
             <% } %>
           </div>
           <div style="display:flex;gap:.75rem;">
-            <a href="/taches" class="btn btn-secondary">Annuler</a>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+            <a href="/taches<%= qs %>" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer la tâche</button>
           </div>
         </div>
       </form>
 
       <% if (tache && histories && histories.length > 0) { %>
-        <hr style="margin:2rem 0;border:none;border-top:1px solid #e2e8f0;">
-        <h3 style="font-size:1.1rem;color:#0f172a;margin-bottom:1rem;"><i class="fas fa-history"></i> Historique de la tâche</h3>
+        <hr style="margin:2.5rem 0 1.5rem;border:none;border-top:1px solid var(--border);">
+        <h3 style="font-size:1.1rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fas fa-history" style="color:var(--primary);"></i> Historique des modifications
+        </h3>
         <div style="display:flex;flex-direction:column;gap:0.75rem;">
           <% histories.forEach(h => { %>
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;font-size:0.85rem;">
-              <div style="display:flex;justify-content:space-between;color:#64748b;margin-bottom:0.25rem;">
-                <strong><%= h.identifiant %> &bull; <%= h.action %></strong>
+            <div style="background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.85rem 1rem;font-size:0.85rem;">
+              <div style="display:flex;justify-content:space-between;color:var(--text-muted);margin-bottom:0.35rem;font-size:0.8rem;">
+                <span><strong><%= h.identifiant %></strong> &bull; Action : <span class="badge-role"><%= h.action %></span></span>
                 <span><%= h.date_action %></span>
               </div>
-              <div style="color:#334155;font-family:monospace;font-size:0.8rem;"><%= h.details %></div>
+              <div style="color:var(--text-body);font-family:'JetBrains Mono',monospace;font-size:0.75rem;background:#ffffff;padding:0.4rem 0.6rem;border-radius:var(--radius-sm);border:1px solid var(--border);word-break:break-all;"><%= h.details %></div>
             </div>
           <% }); %>
         </div>
