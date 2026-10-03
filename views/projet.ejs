@@ -1,0 +1,234 @@
+<%- include('partials/header') %>
+
+<div class="dash-wrap">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">
+        <h1 style="margin:0;"><i class="fas fa-folder"></i> <%= projet.nom %></h1>
+        <span class="badge-role" style="background:#4338ca;color:#fff;font-size:0.75rem;padding:0.25rem 0.6rem;">
+          Étape <%= currentStep %>/9 : <%= steps[currentStep] ? steps[currentStep].title : '' %>
+        </span>
+        <% if (projet.go_decision === 'NO_GO') { %>
+          <span class="badge-role" style="background:#b91c1c;color:#fff;font-size:0.75rem;padding:0.25rem 0.6rem;">NO GO</span>
+        <% } else if (projet.status === 'termine') { %>
+          <span class="badge-role" style="background:#15803d;color:#fff;font-size:0.75rem;padding:0.25rem 0.6rem;">Terminé</span>
+        <% } %>
+      </div>
+      <p class="text-muted text-sm" style="margin-top:0.4rem;">
+        Créé par <strong><%= createur ? createur.nom_affiche || createur.identifiant : 'Admin' %></strong> le <%= projet.date_creation.split(' ')[0] %>
+        <% if (projet.description) { %> &mdash; <%= projet.description %><% } %>
+      </p>
+    </div>
+    <div style="display:flex;gap:.5rem;">
+      <a href="/projets/modifier?id=<%= projet.id %>" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i> Modifier</a>
+      <a href="/projets" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Retour</a>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs for Project -->
+  <div style="display:flex;gap:.5rem;border-bottom:2px solid #e2e8f0;margin-bottom:1.5rem;">
+    <a href="/projet?id=<%= projet.id %>&view=processus" class="btn <%= view === 'processus' ? 'btn-primary' : 'btn-secondary' %>" style="border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;">
+      <i class="fas fa-sitemap"></i> Processus R1b
+    </a>
+    <a href="/projet?id=<%= projet.id %>&view=taches" class="btn <%= view === 'taches' ? 'btn-primary' : 'btn-secondary' %>" style="border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;">
+      <i class="fas fa-tasks"></i> Tâches (<%= tasks.length %>)
+    </a>
+    <a href="/projet?id=<%= projet.id %>&view=cahier" class="btn <%= view === 'cahier' ? 'btn-primary' : 'btn-secondary' %>" style="border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;">
+      <i class="fas fa-file-alt"></i> Cahier des charges
+    </a>
+  </div>
+
+  <% if (view === 'processus') { %>
+    <!-- Step progression bar -->
+    <div class="card" style="margin-bottom:1.5rem;padding:1.25rem;">
+      <h3 style="font-size:1rem;margin:0 0 1rem;color:#0f172a;">Parcours de conception &amp; validation (9 étapes R1b)</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));gap:.5rem;">
+        <% for (let i = 1; i <= 9; i++) { 
+             const st = steps[i];
+             const isCurrent = i === currentStep;
+             const isDone = projet.validated_steps.includes(i) || i < projet.current_step;
+        %>
+          <a href="/projet?id=<%= projet.id %>&view=processus&step=<%= i %>" style="text-decoration:none;">
+            <div style="border:2px solid <%= isCurrent ? '#7c3aed' : (isDone ? '#10b981' : '#cbd5e1') %>; background:<%= isCurrent ? '#f5f3ff' : (isDone ? '#ecfdf5' : '#fff') %>; border-radius:8px; padding:0.6rem; text-align:center;">
+              <div style="font-weight:700;font-size:0.8rem;color:<%= isCurrent ? '#7c3aed' : (isDone ? '#047857' : '#64748b') %>;">
+                <% if (isDone) { %><i class="fas fa-check-circle"></i> <% } %>Étape <%= i %>
+              </div>
+              <div style="font-size:0.7rem;color:#334155;margin-top:0.25rem;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                <%= st.title %>
+              </div>
+            </div>
+          </a>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Step Detail Card -->
+    <div class="card" style="padding:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:1rem;margin-bottom:1.25rem;">
+        <div>
+          <span style="font-size:0.8rem;text-transform:uppercase;color:#7c3aed;font-weight:700;letter-spacing:0.05em;">Étape <%= currentStep %> sur 9</span>
+          <h2 style="font-size:1.3rem;margin:0.25rem 0 0;color:#0f172a;"><%= steps[currentStep] ? steps[currentStep].title : '' %></h2>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <% if (currentStep > 1) { %>
+            <a href="/projet?id=<%= projet.id %>&view=processus&step=<%= currentStep - 1 %>" class="btn btn-secondary btn-sm"><i class="fas fa-chevron-left"></i> Précédente</a>
+          <% } %>
+          <% if (currentStep < 9) { %>
+            <a href="/projet?id=<%= projet.id %>&view=processus&step=<%= currentStep + 1 %>" class="btn btn-secondary btn-sm">Suivante <i class="fas fa-chevron-right"></i></a>
+          <% } %>
+        </div>
+      </div>
+
+      <% if (currentStep === 1) { %>
+        <!-- Note de cadrage & besoin -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:1.25rem;margin-bottom:1.5rem;">
+          <h4 style="margin:0 0 .75rem;font-size:0.95rem;color:#0f172a;"><i class="fas fa-info-circle"></i> Note de cadrage initial</h4>
+          <p style="font-size:0.875rem;color:#475569;margin:0 0 .5rem;">
+            Origine : <strong><%= projet.cadrage_commerciale ? 'Service Commercial' : '' %><%= projet.cadrage_commerciale && projet.cadrage_technique ? ' & ' : '' %><%= projet.cadrage_technique ? 'Service Technique' : '' %><%= (!projet.cadrage_commerciale && !projet.cadrage_technique) ? 'Non spécifié' : '' %></strong>
+          </p>
+          <p style="font-size:0.875rem;color:#475569;margin:0;">
+            Destination du besoin : <strong><%= projet.cadrage_destination === 'externe' ? 'Externe (client)' : 'Interne (laboratoire R&D)' %></strong>
+          </p>
+        </div>
+      <% } else if (currentStep === 3) { %>
+        <!-- GO / NO GO decision -->
+        <div style="background:<%= projet.go_decision === 'NO_GO' ? '#fee2e2' : '#f0fdf4' %>;border:1px solid <%= projet.go_decision === 'NO_GO' ? '#fecaca' : '#bbf7d0' %>;border-radius:8px;padding:1.25rem;margin-bottom:1.5rem;">
+          <h4 style="margin:0 0 .5rem;color:<%= projet.go_decision === 'NO_GO' ? '#b91c1c' : '#15803d' %>;">
+            <i class="fas fa-gavel"></i> Décision de passage (Jalon GO / NO GO)
+          </h4>
+          <p style="font-size:0.875rem;color:#334155;margin:0 0 1rem;">
+            Statut actuel de la décision : <strong><%= projet.go_decision || 'En attente de validation DG' %></strong>
+          </p>
+          <form method="POST" action="/projet/decision" style="display:flex;gap:0.75rem;">
+            <input type="hidden" name="id" value="<%= projet.id %>">
+            <input type="hidden" name="step" value="3">
+            <button type="submit" name="decision" value="GO" class="btn btn-primary btn-sm" style="background:#15803d;">
+              <i class="fas fa-check"></i> Valider GO
+            </button>
+            <button type="submit" name="decision" value="NO_GO" class="btn btn-danger btn-sm" style="background:#b91c1c;">
+              <i class="fas fa-times"></i> Prononcer NO GO
+            </button>
+          </form>
+        </div>
+      <% } %>
+
+      <!-- Step Notes -->
+      <form method="POST" action="/projet/notes">
+        <input type="hidden" name="id" value="<%= projet.id %>">
+        <input type="hidden" name="step" value="<%= currentStep %>">
+        <div class="form-group">
+          <label for="step_notes" style="font-weight:600;">Notes &amp; livrables de l'étape <%= currentStep %></label>
+          <textarea id="step_notes" name="step_notes" class="form-control" rows="4" placeholder="Compte-rendu, relevés techniques, arbitrages de l'étape..."><%= projet.step_notes || '' %></textarea>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer les notes</button>
+          
+          <form method="POST" action="/projet/valider_etape" style="display:inline;">
+            <input type="hidden" name="id" value="<%= projet.id %>">
+            <input type="hidden" name="step" value="<%= currentStep %>">
+            <button type="submit" class="btn btn-secondary" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0;">
+              <i class="fas fa-check-double"></i> Valider &amp; passer à l'étape suivante
+            </button>
+          </form>
+        </div>
+      </form>
+    </div>
+
+  <% } else if (view === 'taches') { %>
+    <!-- Tasks inside project -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h3 style="margin:0;font-size:1.1rem;color:#0f172a;"><i class="fas fa-tasks"></i> Tâches du projet</h3>
+      <a href="/tache/creer?projet_id=<%= projet.id %>" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nouvelle tâche</a>
+    </div>
+
+    <div class="r1b-kanban r1b-kanban-4">
+      <% const kanbanCols = [
+           { id: 'a_faire', title: 'À faire', bg: 'kanban-col-todo' },
+           { id: 'en_cours', title: 'En cours', bg: 'kanban-col-progress' },
+           { id: 'validation', title: 'En validation', bg: 'kanban-col-validation' },
+           { id: 'terminee', title: 'Terminé', bg: 'kanban-col-done' }
+         ];
+      %>
+      <% kanbanCols.forEach(col => { 
+           const items = tasks.filter(t => t.kanban_status === col.id);
+      %>
+        <div class="r1b-kanban-col <%= col.bg %>">
+          <div class="r1b-kanban-head">
+            <span class="kanban-col-title"><%= col.title %></span>
+            <span class="kanban-col-count"><%= items.length %></span>
+          </div>
+          <% if (items.length === 0) { %>
+            <p class="text-muted text-sm" style="padding:.35rem .15rem;">Aucune tâche</p>
+          <% } %>
+          <% items.forEach(t => { %>
+            <div class="r1b-kanban-card">
+              <p class="font-medium"><a href="/tache/modifier?id=<%= t.id %>"><%= t.titre %></a></p>
+              <% if (t.description) { %>
+                <p class="text-xs text-muted mt-1" style="white-space:pre-wrap;line-height:1.4;"><%= t.description.slice(0, 120) %></p>
+              <% } %>
+              <p class="task-card-meta">#<%= t.id %> · Priorité <%= t.priorite %> <%= t.date_echeance ? '· Échéance : ' + t.date_echeance : '' %></p>
+              <div class="kanban-card-foot">
+                <div class="kanban-assignee"><%= t.assigne_a || 'Non assigné' %></div>
+                <form method="POST" action="/taches/update_status" class="kanban-status-form">
+                  <input type="hidden" name="task_id" value="<%= t.id %>">
+                  <input type="hidden" name="projet_id" value="<%= projet.id %>">
+                  <select name="status" class="kanban-status-select" onchange="this.form.submit()">
+                    <option value="a_faire" <%= t.kanban_status === 'a_faire' ? 'selected' : '' %>>À faire</option>
+                    <option value="en_cours" <%= t.kanban_status === 'en_cours' ? 'selected' : '' %>>En cours</option>
+                    <option value="validation" <%= t.kanban_status === 'validation' ? 'selected' : '' %>>Validation</option>
+                    <option value="terminee" <%= t.kanban_status === 'terminee' ? 'selected' : '' %>>Terminé</option>
+                  </select>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% }); %>
+    </div>
+
+  <% } else if (view === 'cahier') { %>
+    <!-- Cahier des charges -->
+    <div class="card" style="padding:1.5rem;">
+      <h3 style="margin:0 0 1.25rem;font-size:1.15rem;color:#0f172a;"><i class="fas fa-file-contract"></i> Cahier des charges fonctionnel &amp; technique</h3>
+      
+      <form method="POST" action="/projet/cahier">
+        <input type="hidden" name="id" value="<%= projet.id %>">
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label for="categorie">Catégorie de produit</label>
+            <input type="text" id="categorie" name="categorie" class="form-control" value="<%= cahier.categorie || '' %>" placeholder="Ex: Produit Électronique Connecté">
+          </div>
+          <div class="form-group">
+            <label for="budget">Budget alloué</label>
+            <input type="text" id="budget" name="budget" class="form-control" value="<%= cahier.budget || '' %>" placeholder="Ex: 25 000 € HT">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="contexte">Contexte &amp; genèse du besoin</label>
+          <textarea id="contexte" name="contexte" class="form-control" rows="3" placeholder="Pourquoi ce projet est-il lancé ? Quel est l'environnement client ?"><%= cahier.contexte || '' %></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="objectifs">Objectifs mesurables</label>
+          <textarea id="objectifs" name="objectifs" class="form-control" rows="3" placeholder="Quels résultats clés doivent être atteints ?"><%= cahier.objectifs || '' %></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="contraintes">Contraintes techniques, normatives &amp; industrielles</label>
+          <textarea id="contraintes" name="contraintes" class="form-control" rows="3" placeholder="Normes CE, CEM, encombrement maximal, autonomie batterie..."><%= cahier.contraintes || '' %></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="criteres_reussite">Critères d'acceptation &amp; de recette</label>
+          <textarea id="criteres_reussite" name="criteres_reussite" class="form-control" rows="3" placeholder="Critères validant le passage en production de série"><%= cahier.criteres_reussite || '' %></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer le cahier des charges</button>
+      </form>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

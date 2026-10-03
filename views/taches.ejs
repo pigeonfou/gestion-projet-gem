@@ -1,0 +1,92 @@
+<%- include('partials/header') %>
+
+<div class="taches-page-wrap">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1><i class="fas fa-tasks"></i> Gestion des tâches</h1>
+      <p class="text-muted text-sm mt-1">
+        <% if (user.role === 'admin') { %>
+          Toutes les tâches de tous les projets R&amp;D
+        <% } else { %>
+          Vos tâches affectées &mdash; tous projets confondus
+        <% } %>
+      </p>
+    </div>
+    <div style="display:flex;gap:.5rem;">
+      <a href="/tache/creer" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle tâche</a>
+    </div>
+  </div>
+
+  <div class="card" style="padding:.75rem 1rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+    <form method="GET" action="/taches" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <label for="projet_filter" style="font-size:0.85rem;font-weight:600;color:#475569;margin:0;">Filtrer par projet :</label>
+      <select id="projet_filter" name="projet_id" class="form-control" style="width:auto;min-width:200px;" onchange="this.form.submit()">
+        <option value="">Tous les projets</option>
+        <% projets.forEach(p => { %>
+          <option value="<%= p.id %>" <%= selectedProjetId === p.id ? 'selected' : '' %>><%= p.nom %></option>
+        <% }); %>
+      </select>
+    </form>
+    <div style="font-size:0.85rem;color:#64748b;">
+      Total : <strong><%= taches.length %></strong> tâche(s)
+    </div>
+  </div>
+
+  <div class="r1b-kanban r1b-kanban-4">
+    <% const cols = [
+         { id: 'a_faire', title: 'À faire', bg: 'kanban-col-todo' },
+         { id: 'en_cours', title: 'En cours', bg: 'kanban-col-progress' },
+         { id: 'validation', title: 'En validation', bg: 'kanban-col-validation' },
+         { id: 'terminee', title: 'Terminé', bg: 'kanban-col-done' }
+       ];
+    %>
+    <% cols.forEach(col => { 
+         const items = taches.filter(t => t.kanban_status === col.id);
+    %>
+      <div class="r1b-kanban-col <%= col.bg %>">
+        <div class="r1b-kanban-head">
+          <span class="kanban-col-title"><%= col.title %></span>
+          <span class="kanban-col-count"><%= items.length %></span>
+        </div>
+        <% if (items.length === 0) { %>
+          <p class="text-muted text-sm" style="padding:.35rem .15rem;">Aucune tâche</p>
+        <% } %>
+        <% items.forEach(t => { 
+             const p = projets.find(x => x.id === t.projet_id);
+        %>
+          <div class="r1b-kanban-card">
+            <p class="font-medium"><a href="/tache/modifier?id=<%= t.id %>"><%= t.titre %></a></p>
+            <% if (t.description) { %>
+              <p class="text-xs text-muted mt-1" style="white-space:pre-wrap;line-height:1.4;"><%= t.description.length > 120 ? t.description.slice(0, 120) + '…' : t.description %></p>
+            <% } %>
+            <p class="task-card-meta">
+              #<%= t.id %> · Priorité <%= t.priorite %>
+              <% if (t.date_echeance) { %> · Échéance : <%= t.date_echeance %><% } %>
+            </p>
+            <div class="kanban-card-foot">
+              <div>
+                <div class="kanban-assignee"><%= t.assigne_a || 'Non assigné' %></div>
+                <% if (p) { %>
+                  <a class="kanban-project-link" href="/projet?id=<%= p.id %>&view=taches" style="font-size:0.75rem;color:#6366f1;text-decoration:none;display:inline-block;margin-top:0.25rem;">
+                    <i class="fas fa-folder-open"></i> <%= p.nom %>
+                  </a>
+                <% } %>
+              </div>
+              <form method="POST" action="/taches/update_status" class="kanban-status-form">
+                <input type="hidden" name="task_id" value="<%= t.id %>">
+                <select name="status" class="kanban-status-select" onchange="this.form.submit()">
+                  <option value="a_faire" <%= t.kanban_status === 'a_faire' ? 'selected' : '' %>>À faire</option>
+                  <option value="en_cours" <%= t.kanban_status === 'en_cours' ? 'selected' : '' %>>En cours</option>
+                  <option value="validation" <%= t.kanban_status === 'validation' ? 'selected' : '' %>>En validation</option>
+                  <option value="terminee" <%= t.kanban_status === 'terminee' ? 'selected' : '' %>>Terminé</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

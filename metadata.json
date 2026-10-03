@@ -1,0 +1,6 @@
+{
+  "name": "ProjectFlow",
+  "description": "Application web de gestion de projets, tâches, utilisateurs et cahiers des charges.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

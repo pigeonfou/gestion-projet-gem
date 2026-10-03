@@ -1,0 +1,172 @@
+<%- include('partials/header') %>
+
+<div class="dash-wrap">
+  <div class="dash-page-head">
+    <div>
+      <h2>Tableau de bord</h2>
+      <p class="subtitle">Vue d'ensemble des projets de conception</p>
+    </div>
+    <div class="dash-toolbar">
+      <form method="GET" action="/projets" style="display:flex;gap:.5rem;">
+        <select name="tri" class="form-control" onchange="this.form.submit()">
+          <option value="date_desc" <%= tri === 'date_desc' ? 'selected' : '' %>>Plus récents</option>
+          <option value="date_asc" <%= tri === 'date_asc' ? 'selected' : '' %>>Plus anciens</option>
+          <option value="nom_asc" <%= tri === 'nom_asc' ? 'selected' : '' %>>Nom A→Z</option>
+          <option value="nom_desc" <%= tri === 'nom_desc' ? 'selected' : '' %>>Nom Z→A</option>
+        </select>
+      </form>
+      <a href="/projets/creer" class="btn-r1b btn-r1b-primary">
+        <i class="fas fa-plus"></i> Nouveau projet
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="dash-kpi-grid">
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Projets actifs</p>
+      <p class="dash-kpi-value"><%= kpis.projetsActifs %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Tâches en cours</p>
+      <p class="dash-kpi-value"><%= kpis.tachesOuvertes %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Validations en attente</p>
+      <p class="dash-kpi-value"><%= kpis.validationsPending %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Jalons</p>
+      <p class="dash-kpi-value"><%= kpis.jalonsTotal %></p>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-col-main">
+      <div class="dash-card">
+        <h3>Projets (En cours)</h3>
+        <% if (projetsEnCours.length === 0) { %>
+          <div class="dash-empty">
+            <i class="fas fa-folder-open"></i>
+            <p>Aucun projet en cours.</p>
+            <a href="/projets/creer" class="btn-r1b btn-r1b-primary" style="margin-top:.75rem;">Créer un projet</a>
+          </div>
+        <% } else { %>
+          <div class="dash-proj-list">
+            <% projetsEnCours.forEach(p => { %>
+              <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
+                <div class="dash-proj-top">
+                  <div>
+                    <span class="dash-proj-name"><%= p.nom %></span>
+                    <span class="dash-proj-badge"><%= steps[p.current_step] ? steps[p.current_step].title : 'Étape ' + p.current_step %></span>
+                  </div>
+                  <span class="dash-proj-pct"><%= Math.round((p.current_step / 9) * 100) %>%</span>
+                </div>
+                <div class="dash-proj-bar">
+                  <div class="dash-proj-fill" style="width:<%= Math.round((p.current_step / 9) * 100) %>%"></div>
+                </div>
+                <p class="dash-proj-meta">
+                  <%= p.createur %> · <%= p.nb_taches %> tâche(s)
+                  <% if (p.description) { %>
+                    · <%= p.description.length > 80 ? p.description.slice(0, 80) + '…' : p.description %>
+                  <% } %>
+                </p>
+                <div class="dash-proj-actions" onclick="event.stopPropagation()">
+                  <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
+                  <a href="/projets/modifier?id=<%= p.id %>" class="btn-r1b btn-r1b-secondary btn-r1b-sm"><i class="fas fa-edit"></i></a>
+                  <form method="POST" action="/projets/supprimer" style="display:inline;" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
+                    <input type="hidden" name="id" value="<%= p.id %>">
+                    <button type="submit" class="btn-r1b btn-r1b-danger btn-r1b-sm"><i class="fas fa-trash"></i></button>
+                  </form>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="dash-card">
+        <h3>Archivage</h3>
+        <div class="dash-archive-wrap">
+          <div class="dash-archive-section abandonnes">
+            <h4>
+              <i class="fas fa-times-circle"></i> Projets abandonnés
+              <span class="count"><%= projetsAbandonnes.length %></span>
+            </h4>
+            <% if (projetsAbandonnes.length === 0) { %>
+              <div class="dash-empty"><p>Aucun projet abandonné.</p></div>
+            <% } else { %>
+              <div class="dash-proj-list">
+                <% projetsAbandonnes.forEach(p => { %>
+                  <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
+                    <div class="dash-proj-top">
+                      <div>
+                        <span class="dash-proj-name"><%= p.nom %></span>
+                        <span class="dash-proj-badge" style="background:#fee2e2;color:#b91c1c;">Abandonné (NO GO)</span>
+                      </div>
+                      <span class="dash-proj-pct"><%= Math.round((p.current_step / 9) * 100) %>%</span>
+                    </div>
+                    <div class="dash-proj-bar">
+                      <div class="dash-proj-fill" style="width:<%= Math.round((p.current_step / 9) * 100) %>%; background:#ef4444;"></div>
+                    </div>
+                    <p class="dash-proj-meta"><%= p.createur %> · <%= p.nb_taches %> tâche(s)</p>
+                    <div class="dash-proj-actions" onclick="event.stopPropagation()">
+                      <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="dash-archive-section valides">
+            <h4>
+              <i class="fas fa-check-circle"></i> Projets validé/vente
+              <span class="count"><%= projetsValides.length %></span>
+            </h4>
+            <% if (projetsValides.length === 0) { %>
+              <div class="dash-empty"><p>Aucun projet validé / vente.</p></div>
+            <% } else { %>
+              <div class="dash-proj-list">
+                <% projetsValides.forEach(p => { %>
+                  <div class="dash-proj-item" onclick="if(!event.target.closest('a,button')) location.href='/projet?id=<%= p.id %>'">
+                    <div class="dash-proj-top">
+                      <div>
+                        <span class="dash-proj-name"><%= p.nom %></span>
+                        <span class="dash-proj-badge" style="background:#d1fae5;color:#047857;">Validé / Vente</span>
+                      </div>
+                      <span class="dash-proj-pct">100%</span>
+                    </div>
+                    <div class="dash-proj-bar">
+                      <div class="dash-proj-fill" style="width:100%; background:#10b981;"></div>
+                    </div>
+                    <p class="dash-proj-meta"><%= p.createur %> · <%= p.nb_taches %> tâche(s)</p>
+                    <div class="dash-proj-actions" onclick="event.stopPropagation()">
+                      <a href="/projet?id=<%= p.id %>" class="btn-r1b btn-r1b-primary btn-r1b-sm"><i class="fas fa-eye"></i> Voir</a>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <h3>Activité récente</h3>
+      <% if (projetsEnCours.length === 0) { %>
+        <p class="text-muted text-sm">Aucune activité</p>
+      <% } else { %>
+        <% projetsEnCours.slice(0, 6).forEach(p => { %>
+          <div class="dash-side-item">
+            <p class="dash-side-title"><%= p.nom %></p>
+            <p class="dash-side-meta"><%= steps[p.current_step] ? steps[p.current_step].title : 'Étape ' + p.current_step %> · <%= p.date_creation.split(' ')[0] %> · <%= p.createur %></p>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

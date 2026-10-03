@@ -1,0 +1,126 @@
+<%- include('partials/header') %>
+
+<div class="dash-wrap">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1><i class="fas fa-boxes"></i> Stocks &amp; Matériel</h1>
+      <p class="text-muted text-sm mt-1">Pièces détachées et équipements du laboratoire R&amp;D &mdash; affectations projets</p>
+    </div>
+    <div style="display:flex;gap:.5rem;">
+      <a href="/stock/creer" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvel article</a>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="dash-kpi-grid">
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Total références</p>
+      <p class="dash-kpi-value"><%= kpis.total %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Pièces composants</p>
+      <p class="dash-kpi-value"><%= kpis.pieces %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Équipements labo</p>
+      <p class="dash-kpi-value"><%= kpis.equipements %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Alertes réappro.</p>
+      <p class="dash-kpi-value" style="<%= kpis.alertes > 0 ? 'color:#b91c1c;' : '' %>"><%= kpis.alertes %></p>
+    </div>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <div class="card" style="padding:1rem;margin-bottom:1.5rem;">
+    <form method="GET" action="/stocks" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;">
+        <input type="text" name="q" class="form-control" placeholder="Rechercher par référence, désignation, emplacement..." value="<%= q || '' %>">
+      </div>
+      <div>
+        <select name="type" class="form-control" onchange="this.form.submit()">
+          <option value="">Tous les types</option>
+          <option value="piece" <%= typeFilter === 'piece' ? 'selected' : '' %>>Pièces</option>
+          <option value="equipement" <%= typeFilter === 'equipement' ? 'selected' : '' %>>Équipements</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem;">
+        <input type="checkbox" id="alerte" name="alerte" value="1" <%= alertOnly ? 'checked' : '' %> onchange="this.form.submit()">
+        <label for="alerte" style="font-size:0.875rem;margin:0;cursor:pointer;">Alertes réapprovisionnement uniquement</label>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-search"></i> Filtrer</button>
+      <% if (q || typeFilter || alertOnly) { %>
+        <a href="/stocks" class="btn btn-secondary btn-sm">Réinitialiser</a>
+      <% } %>
+    </form>
+  </div>
+
+  <!-- Articles Table -->
+  <div class="card" style="overflow-x:auto;">
+    <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+          <th style="padding:.75rem 1rem;">Référence</th>
+          <th style="padding:.75rem 1rem;">Désignation</th>
+          <th style="padding:.75rem 1rem;">Type</th>
+          <th style="padding:.75rem 1rem;">Emplacement</th>
+          <th style="padding:.75rem 1rem;">Fournisseur</th>
+          <th style="padding:.75rem 1rem;text-align:right;">Stock</th>
+          <th style="padding:.75rem 1rem;text-align:right;">Seuil Min</th>
+          <th style="padding:.75rem 1rem;text-align:right;">P.U. HT</th>
+          <th style="padding:.75rem 1rem;text-align:center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (articles.length === 0) { %>
+          <tr>
+            <td colspan="9" style="text-align:center;padding:2rem;color:#64748b;">
+              Aucun article trouvé.
+            </td>
+          </tr>
+        <% } %>
+        <% articles.forEach(a => { 
+             const isAlert = a.quantite_stock <= a.quantite_min;
+        %>
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:.75rem 1rem;font-weight:600;font-family:monospace;color:#0f172a;">
+              <%= a.reference %>
+            </td>
+            <td style="padding:.75rem 1rem;">
+              <strong><%= a.designation %></strong>
+              <% if (a.description) { %>
+                <div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;"><%= a.description.length > 80 ? a.description.slice(0, 80) + '…' : a.description %></div>
+              <% } %>
+            </td>
+            <td style="padding:.75rem 1rem;">
+              <span class="badge-role" style="background:<%= a.type === 'equipement' ? '#ede9fe;color:#5b21b6' : '#e0f2fe;color:#0369a1' %>;">
+                <%= a.type === 'equipement' ? 'Équipement' : 'Pièce' %>
+              </span>
+            </td>
+            <td style="padding:.75rem 1rem;color:#475569;">
+              <i class="fas fa-map-marker-alt" style="font-size:0.75rem;color:#94a3b8;"></i> <%= a.emplacement || '—' %>
+            </td>
+            <td style="padding:.75rem 1rem;color:#475569;"><%= a.fournisseur || '—' %></td>
+            <td style="padding:.75rem 1rem;text-align:right;font-weight:700;color:<%= isAlert ? '#b91c1c' : '#0f172a' %>;">
+              <%= a.quantite_stock %> <%= a.unite %>
+              <% if (isAlert) { %>
+                <i class="fas fa-exclamation-triangle" title="Stock inférieur ou égal au seuil critique" style="margin-left:0.25rem;"></i>
+              <% } %>
+            </td>
+            <td style="padding:.75rem 1rem;text-align:right;color:#64748b;"><%= a.quantite_min %> <%= a.unite %></td>
+            <td style="padding:.75rem 1rem;text-align:right;font-family:monospace;"><%= a.valeur_unitaire.toFixed(2) %> €</td>
+            <td style="padding:.75rem 1rem;text-align:center;">
+              <a href="/stock/modifier?id=<%= a.id %>" class="btn btn-secondary btn-sm" style="padding:.2rem .4rem;" title="Modifier"><i class="fas fa-edit"></i></a>
+              <form method="POST" action="/stock/supprimer" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cet article ?');">
+                <input type="hidden" name="id" value="<%= a.id %>">
+                <button type="submit" class="btn btn-danger btn-sm" style="padding:.2rem .4rem;" title="Supprimer"><i class="fas fa-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

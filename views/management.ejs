@@ -1,0 +1,256 @@
+<%- include('partials/header') %>
+
+<div class="dash-wrap">
+  <div class="page-header">
+    <div>
+      <h1><i class="fas fa-sitemap"></i> Système de management</h1>
+      <p class="text-muted">Pilotage qualité, processus de conception, risques &amp; amélioration continue</p>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="dash-kpi-grid">
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Processus actifs</p>
+      <p class="dash-kpi-value"><%= kpis.processus %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Documents maîtrisés</p>
+      <p class="dash-kpi-value"><%= kpis.documents %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Risques ouverts</p>
+      <p class="dash-kpi-value"><%= kpis.risques %></p>
+    </div>
+    <div class="dash-kpi">
+      <p class="dash-kpi-label">Actions ouvertes</p>
+      <p class="dash-kpi-value"><%= kpis.actions %></p>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="card" style="padding:.75rem;margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap;">
+    <% const tabs = [
+         { id: 'processus', label: 'Processus' },
+         { id: 'documents', label: 'Documents maîtrisés' },
+         { id: 'risques', label: 'Risques & opportunités' },
+         { id: 'actions', label: 'Actions' },
+         { id: 'nc', label: 'Non-conformités' }
+       ];
+    %>
+    <% tabs.forEach(t => { %>
+      <a class="btn <%= currentTab === t.id ? 'btn-primary' : 'btn-secondary' %> btn-sm" href="/management?tab=<%= t.id %>">
+        <%= t.label %>
+      </a>
+    <% }); %>
+  </div>
+
+  <% if (currentTab === 'processus') { %>
+    <div class="card" style="padding:1.25rem;">
+      <h2 style="font-size:1.15rem;margin:0 0 1rem;color:#0f172a;"><i class="fas fa-project-diagram"></i> Cartographie des processus</h2>
+      <form method="POST" action="/management" style="background:#f8fafc;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+        <input type="hidden" name="action" value="processus">
+        <div style="display:grid;grid-template-columns:120px 1fr 1fr auto;gap:.75rem;align-items:center;">
+          <input class="form-control" name="code" placeholder="Code (PR-xx)" required>
+          <input class="form-control" name="nom" placeholder="Nom du processus" required>
+          <input class="form-control" name="pilote" placeholder="Pilote du processus">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Ajouter</button>
+        </div>
+        <textarea class="form-control" name="description" placeholder="Finalité, indicateurs de performance, entrées, sorties..." style="margin-top:.75rem;" rows="2"></textarea>
+      </form>
+
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+            <th style="padding:.75rem 1rem;">Code</th>
+            <th style="padding:.75rem 1rem;">Processus</th>
+            <th style="padding:.75rem 1rem;">Pilote</th>
+            <th style="padding:.75rem 1rem;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% processusList.forEach(p => { %>
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.75rem 1rem;font-weight:700;font-family:monospace;"><%= p.code %></td>
+              <td style="padding:.75rem 1rem;font-weight:600;"><%= p.nom %></td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= p.pilote %></td>
+              <td style="padding:.75rem 1rem;color:#64748b;"><%= p.description %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+  <% } else if (currentTab === 'documents') { %>
+    <div class="card" style="padding:1.25rem;">
+      <h2 style="font-size:1.15rem;margin:0 0 1rem;color:#0f172a;"><i class="fas fa-file-alt"></i> Documents maîtrisés</h2>
+      <form method="POST" action="/management" style="background:#f8fafc;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+        <input type="hidden" name="action" value="document">
+        <div style="display:grid;grid-template-columns:140px 1fr 140px 100px auto;gap:.75rem;align-items:center;">
+          <input class="form-control" name="reference" placeholder="Réf (DOC-xxx)" required>
+          <input class="form-control" name="titre" placeholder="Titre du document" required>
+          <input class="form-control" name="type" placeholder="Type (procédure...)" value="procédure">
+          <input class="form-control" name="version" placeholder="Version" value="1.0">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Créer</button>
+        </div>
+        <textarea class="form-control" name="description" placeholder="Objet / champ d'application" style="margin-top:.75rem;" rows="2"></textarea>
+      </form>
+
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+            <th style="padding:.75rem 1rem;">Réf.</th>
+            <th style="padding:.75rem 1rem;">Titre</th>
+            <th style="padding:.75rem 1rem;">Type</th>
+            <th style="padding:.75rem 1rem;">Version</th>
+            <th style="padding:.75rem 1rem;">Statut</th>
+            <th style="padding:.75rem 1rem;">Auteur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% docsList.forEach(d => { %>
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.75rem 1rem;font-weight:700;font-family:monospace;"><%= d.reference %></td>
+              <td style="padding:.75rem 1rem;font-weight:600;"><%= d.titre %></td>
+              <td style="padding:.75rem 1rem;"><%= d.type %></td>
+              <td style="padding:.75rem 1rem;"><%= d.version %></td>
+              <td style="padding:.75rem 1rem;">
+                <span class="badge-role" style="background:#dcfce7;color:#15803d;"><%= d.statut %></span>
+              </td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= d.auteur %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+  <% } else if (currentTab === 'risques') { %>
+    <div class="card" style="padding:1.25rem;">
+      <h2 style="font-size:1.15rem;margin:0 0 1rem;color:#0f172a;"><i class="fas fa-shield-alt"></i> Risques &amp; Opportunités</h2>
+      <form method="POST" action="/management" style="background:#f8fafc;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+        <input type="hidden" name="action" value="risque">
+        <div style="display:grid;grid-template-columns:140px 1fr 100px 100px auto;gap:.75rem;align-items:center;">
+          <select name="type" class="form-control">
+            <option value="risque">Risque</option>
+            <option value="opportunite">Opportunité</option>
+          </select>
+          <input class="form-control" name="description" placeholder="Description du risque / opportunité" required>
+          <input class="form-control" type="number" min="1" max="5" name="probabilite" value="2" title="Probabilité (1 à 5)">
+          <input class="form-control" type="number" min="1" max="5" name="impact" value="3" title="Impact (1 à 5)">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Enregistrer</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+          <input class="form-control" name="action_prevue" placeholder="Action préventive / de traitement">
+          <input class="form-control" name="responsable" placeholder="Responsable">
+        </div>
+      </form>
+
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+            <th style="padding:.75rem 1rem;">Type</th>
+            <th style="padding:.75rem 1rem;">Description</th>
+            <th style="padding:.75rem 1rem;text-align:center;">Criticité (P×I)</th>
+            <th style="padding:.75rem 1rem;">Action prévue</th>
+            <th style="padding:.75rem 1rem;">Responsable</th>
+            <th style="padding:.75rem 1rem;">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% risksList.forEach(r => { %>
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.75rem 1rem;">
+                <span class="badge-role" style="background:<%= r.type === 'opportunite' ? '#dcfce7;color:#15803d' : '#fee2e2;color:#b91c1c' %>;">
+                  <%= r.type %>
+                </span>
+              </td>
+              <td style="padding:.75rem 1rem;font-weight:600;"><%= r.description %></td>
+              <td style="padding:.75rem 1rem;text-align:center;font-weight:700;"><%= r.criticite %></td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= r.action_prevue %></td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= r.responsable %></td>
+              <td style="padding:.75rem 1rem;"><%= r.statut %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+  <% } else if (currentTab === 'actions') { %>
+    <div class="card" style="padding:1.25rem;">
+      <h2 style="font-size:1.15rem;margin:0 0 1rem;color:#0f172a;"><i class="fas fa-check-square"></i> Plan d'actions qualité</h2>
+      <form method="POST" action="/management" style="background:#f8fafc;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+        <input type="hidden" name="action" value="actionq">
+        <div style="display:grid;grid-template-columns:1fr 140px 140px auto;gap:.75rem;align-items:center;">
+          <input class="form-control" name="description" placeholder="Action à réaliser" required>
+          <input class="form-control" name="responsable" placeholder="Responsable">
+          <input class="form-control" type="date" name="echeance">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Ajouter</button>
+        </div>
+      </form>
+
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+            <th style="padding:.75rem 1rem;">Action</th>
+            <th style="padding:.75rem 1rem;">Origine</th>
+            <th style="padding:.75rem 1rem;">Responsable</th>
+            <th style="padding:.75rem 1rem;">Échéance</th>
+            <th style="padding:.75rem 1rem;">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% actionsList.forEach(a => { %>
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.75rem 1rem;font-weight:600;"><%= a.description %></td>
+              <td style="padding:.75rem 1rem;color:#64748b;"><%= a.origine %></td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= a.responsable %></td>
+              <td style="padding:.75rem 1rem;"><%= a.echeance || '—' %></td>
+              <td style="padding:.75rem 1rem;"><%= a.statut %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+  <% } else if (currentTab === 'nc') { %>
+    <div class="card" style="padding:1.25rem;">
+      <h2 style="font-size:1.15rem;margin:0 0 1rem;color:#0f172a;"><i class="fas fa-exclamation-triangle"></i> Fiches de non-conformité</h2>
+      <form method="POST" action="/management" style="background:#f8fafc;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+        <input type="hidden" name="action" value="nc">
+        <div class="form-group">
+          <input class="form-control" name="description" placeholder="Description de l'anomalie ou non-conformité" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;align-items:center;">
+          <input class="form-control" name="detection" placeholder="Origine / détection">
+          <input class="form-control" name="responsable" placeholder="Responsable">
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Déclarer NC</button>
+        </div>
+      </form>
+
+      <table class="table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;text-align:left;">
+            <th style="padding:.75rem 1rem;">Référence</th>
+            <th style="padding:.75rem 1rem;">Description</th>
+            <th style="padding:.75rem 1rem;">Détection</th>
+            <th style="padding:.75rem 1rem;">Responsable</th>
+            <th style="padding:.75rem 1rem;">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% ncList.forEach(nc => { %>
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.75rem 1rem;font-weight:700;font-family:monospace;color:#b91c1c;"><%= nc.reference %></td>
+              <td style="padding:.75rem 1rem;font-weight:600;"><%= nc.description %></td>
+              <td style="padding:.75rem 1rem;color:#64748b;"><%= nc.detection %></td>
+              <td style="padding:.75rem 1rem;color:#475569;"><%= nc.responsable %></td>
+              <td style="padding:.75rem 1rem;"><%= nc.statut %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle ? pageTitle + ' - ' : '' %><%= siteNom %></title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/projet-r1b.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="/projets" class="logo">
+        <i class="fas fa-project-diagram"></i>
+        <span><%= siteNom %></span>
+      </a>
+      <% if (user) { %>
+      <nav class="nav">
+        <a href="/projets" class="nav-link <%= activePage === 'projets' ? 'active' : '' %>">
+          <i class="fas fa-folder-open"></i> Projets
+        </a>
+        <a href="/taches" class="nav-link <%= activePage === 'taches' ? 'active' : '' %>">
+          <i class="fas fa-tasks"></i> Tâches
+        </a>
+        <a href="/stocks" class="nav-link <%= activePage === 'stocks' ? 'active' : '' %>">
+          <i class="fas fa-boxes"></i> Stocks &amp; Matériel
+        </a>
+        <a href="/stocks" class="nav-link <%= activePage === 'stock_pilotage' ? 'active' : '' %>">
+          <i class="fas fa-warehouse"></i> Stock avancé
+        </a>
+        <a href="/management" class="nav-link <%= activePage === 'management' ? 'active' : '' %>">
+          <i class="fas fa-sitemap"></i> Management
+        </a>
+      </nav>
+      <div class="user-menu">
+        <div class="user-dropdown">
+          <button type="button" class="user-dropdown-toggle" id="userMenuBtn" aria-expanded="false">
+            <i class="fas fa-user-circle"></i>
+            <%= user.identifiant %>
+            <span class="badge-role"><%= user.role %></span>
+            <i class="fas fa-caret-down" style="font-size:.75rem;opacity:.7;"></i>
+          </button>
+          <div class="user-dropdown-menu" id="userMenu">
+            <% if (user.role === 'admin') { %>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Paramètres</a>
+            <a href="/admin/utilisateurs"><i class="fas fa-users"></i> Utilisateurs</a>
+            <div class="dropdown-divider"></div>
+            <% } %>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <% if (flash && flash.message) { %>
+    <div class="alert alert-<%= flash.type || 'info' %>">
+      <i class="fas fa-<%= flash.type === 'success' ? 'check-circle' : (flash.type === 'error' ? 'exclamation-circle' : 'info-circle') %>"></i>
+      <%= flash.message %>
+      <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <% } %>
